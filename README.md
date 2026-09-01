@@ -9,9 +9,12 @@ The window is frameless (custom title bar), the UI is Vue 3 with shadcn-vue / Ta
 | Area | Package | Role |
 | --- | --- | --- |
 | Desktop shell | Electron 44, electron-vite 5, electron-builder | App window, build, installers |
-| UI | Vue 3, Tailwind CSS 4, shadcn-vue, Reka UI, Lucide | Renderer |
+| UI | Vue 3, Vue Router, Pinia, Tailwind CSS 4, shadcn-vue, Reka UI, Lucide | Renderer |
 | Theme | `@vueuse/core` `useColorMode` | Light / dark / system |
 | Database | Drizzle ORM + `@libsql/client` (SQLite) | Local file DB in the main process |
+| IPC | Zod | Validate main ↔ renderer payloads |
+| Logging | electron-log | File + console logs |
+| Updates | electron-updater | Check for updates in production |
 | Tooling | TypeScript, ESLint, Prettier | Typecheck and format |
 
 **Why libsql instead of better-sqlite3:** libsql ships prebuilt binaries. `better-sqlite3` must compile against Electron’s Node ABI and needs Visual Studio Build Tools on Windows.
@@ -53,7 +56,7 @@ Renderer UI changes hot-reload. Changes in `src/main` or `src/preload` need a re
 | `npm run lint` | ESLint |
 | `npm run format` | Prettier |
 | `npm run db:generate` | Create a Drizzle migration from `src/main/db/schema.ts` |
-| `npm run db:studio` | Open Drizzle Studio against `./dev.db` (not the running app DB) |
+| `npm run db:studio` | Open Drizzle Studio against `./dev.db` |
 
 DevTools: press **F12** while the app is running in development.
 
@@ -93,14 +96,22 @@ After install, the Windows app lives under Program Files (or the per-user instal
 ```
 src/
   main/                 Electron main process (Node)
-    db/                 Drizzle schema, client, IPC handlers
+    db/                 Drizzle schema and client
+    ipc.ts              Typed IPC handlers
+    logger.ts           electron-log setup
+    window-state.ts     Size / position persistence
+    updater.ts          Production update check
     index.ts            Window + app lifecycle
   preload/              contextBridge APIs for the renderer
   renderer/src/         Vue app
+    views/              Routed pages (Home, About)
+    router/             Vue Router (hash history)
+    stores/             Pinia stores
     components/         App chrome + shadcn-vue UI
     composables/        Theme, etc.
-  shared/               Code used by main and renderer
+  shared/               Code used by main, preload, and renderer
     constants.ts        APP_NAME, APP_ID
+    ipc.ts              Channel names + Zod schemas
 drizzle/                SQL migrations (commit these)
 ```
 
@@ -161,7 +172,23 @@ import { settings } from './db/schema'
 
 `npm run db:studio` opens the same `./dev.db` used by `npm run dev`. Packaged builds still use the userData `data.db`.
 
+## Routing and state
+
+- Hash router (`/#/` and `/#/about`) so production `file://` loads work.
+- Pinia store: `src/renderer/src/stores/app.ts` (app name, version, userData path).
+- Add pages under `src/renderer/src/views` and register them in `src/renderer/src/router/index.ts`.
+
+## Desktop behavior
+
+- **Single instance** — a second launch focuses the existing window.
+- **Window state** — size, position, and maximized are saved to `userData/window-state.json`.
+- **Logging** — `electron-log` writes to `userData/logs` (Windows: `%APPDATA%\template\logs`).
+- **Crash handling** — uncaught exceptions and unhandled rejections are logged and shown in a dialog.
+- **Auto-update** — skipped in `npm run dev`. In a packaged build, `electron-updater` checks once (`autoDownload` is off). Configure a real `publish` URL in `electron-builder.yml` before shipping.
+
 ## Window and IPC
+
+Channel names and Zod schemas live in `src/shared/ipc.ts`. Handlers parse every payload before use.
 
 Exposed on `window.api`:
 
@@ -172,11 +199,19 @@ window.api.window.close()
 await window.api.window.isMaximized()
 window.api.window.onMaximizedChange((maximized) => { /* ... */ })
 
+await window.api.app.getInfo()
+
 await window.api.db.getSetting(key)
 await window.api.db.setSetting(key, value)
+
+const opened = await window.api.dialog.open({ properties: ['openFile'] })
+const saved = await window.api.dialog.save({ defaultPath: 'export.txt' })
+await window.api.shell.openPath(opened.filePaths[0])
 ```
 
-Add new main-process APIs in `src/main`, expose them in `src/preload/index.ts`, and type them in `src/preload/index.d.ts`.
+The About page has buttons that exercise the file dialogs.
+
+To add an API: define the channel + schema in `src/shared/ipc.ts`, handle it in `src/main/ipc.ts`, expose it in `src/preload/index.ts`, and type it in `src/preload/index.d.ts`.
 
 ## Environment variables
 

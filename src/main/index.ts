@@ -91,9 +91,12 @@ if (!gotTheLock) {
   })
 
   app.whenReady().then(async () => {
+    
+    // Set the app user model id and name
     electronApp.setAppUserModelId(APP_ID)
     app.setName(APP_NAME)
 
+    // Initialize the database
     try {
       await initDatabase()
     } catch (error) {
@@ -101,13 +104,17 @@ if (!gotTheLock) {
       throw error
     }
 
+    // Register the IPC channels
     registerIpc()
 
     app.on('browser-window-created', (_, window) => {
       optimizer.watchWindowShortcuts(window)
     })
 
+    // Create the main window
     createWindow()
+
+    // Initialize the auto updater
     initAutoUpdater()
 
     app.on('activate', () => {
@@ -118,10 +125,12 @@ if (!gotTheLock) {
   })
 }
 
+// Close the database when the app is quitting
 app.on('before-quit', () => {
   closeDatabase()
 })
 
+// Quit the app when all windows are closed
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()

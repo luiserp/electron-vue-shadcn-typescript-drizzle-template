@@ -2,9 +2,10 @@
   "name": "template",
   "version": "1.0.0",
   "description": "Electron + Vue + TypeScript desktop template",
-  "main": "./out/main/index.js",
+  "main": "./out/main/main.js",
   "author": "example.com",
   "homepage": "https://electron-vite.org",
+  "workspaces": ["packages/*"],
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint --cache .",
@@ -24,6 +25,7 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@template/example-local-dependency": "*",
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
     "@libsql/client": "^0.17.4",

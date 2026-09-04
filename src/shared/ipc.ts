@@ -11,7 +11,8 @@ export const IpcChannels = {
   dialogOpen: 'dialog:open',
   dialogSave: 'dialog:save',
   shellOpenPath: 'shell:open-path',
-  appGetInfo: 'app:get-info'
+  appGetInfo: 'app:get-info',
+  appTestLocalDependency: 'app:test-local-dependency'
 } as const
 
 export const fileFilterSchema = z.object({

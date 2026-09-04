@@ -2,7 +2,8 @@ import { ElectronAPI } from '@electron-toolkit/preload'
 import type { AppInfo, OpenDialogInput, OpenDialogResult, SaveDialogInput, SaveDialogResult } from '../shared/ipc'
 
 export interface AppInfoApi {
-  getInfo: () => Promise<AppInfo>
+  getInfo: () => Promise<AppInfo>,
+  testLocalDependency: () => Promise<string>
 }
 
 export interface DatabaseApi {

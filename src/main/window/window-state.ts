@@ -1,7 +1,7 @@
 import { app, BrowserWindow, screen } from 'electron'
 import { readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
-import { log } from './logger'
+import { log } from '../electron/logger'
 
 export type WindowState = {
   x?: number

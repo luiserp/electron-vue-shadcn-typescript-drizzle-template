@@ -5,11 +5,11 @@ import icon from '../../resources/icon.png?asset'
 import { APP_ID, APP_NAME } from '../shared/constants'
 import { IpcChannels } from '../shared/ipc'
 import { closeDatabase, initDatabase } from './db'
-import { registerErrorHandlers } from './errors'
+import { registerErrorHandlers } from './electron/errors'
 import { registerIpc } from './ipc'
-import { initLogger, log } from './logger'
-import { initAutoUpdater } from './updater'
-import { loadWindowState, trackWindowState } from './window-state'
+import { initLogger, log } from './electron/logger'
+import { initAutoUpdater } from './electron/updater'
+import { loadWindowState, trackWindowState } from './window/window-state'
 
 initLogger()
 registerErrorHandlers()

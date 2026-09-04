@@ -16,5 +16,10 @@ export const useAppStore = defineStore('app', () => {
     userDataPath.value = info.userDataPath
   }
 
-  return { name, version, isPackaged, userDataPath, loadInfo }
+  async function testLocalDependency(): Promise<string> {
+    const result = await window.api.app.testLocalDependency()
+    return result;
+  }
+
+  return { name, version, isPackaged, userDataPath, loadInfo, testLocalDependency }
 })

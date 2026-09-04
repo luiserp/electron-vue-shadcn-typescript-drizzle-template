@@ -34,6 +34,13 @@ async function revealPath(): Promise<void> {
   if (!lastPath.value) return
   await window.api.shell.openPath(lastPath.value)
 }
+
+const result = ref('')
+
+async function testLocalDependency(): Promise<void> {
+  const resultString = await appStore.testLocalDependency()
+  result.value = resultString
+}
 </script>
 
 <template>
@@ -54,6 +61,11 @@ async function revealPath(): Promise<void> {
       <Button variant="outline" :disabled="!lastPath" @click="revealPath">
         Reveal last path
       </Button>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <p v-if="result" class="text-muted-foreground text-sm break-all">{{ result }}</p>
+      <Button variant="outline" @click="testLocalDependency">Test local dependency</Button>
     </div>
 
     <p v-if="lastPath" class="text-muted-foreground text-sm break-all">{{ lastPath }}</p>

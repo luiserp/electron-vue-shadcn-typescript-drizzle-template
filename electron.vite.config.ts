@@ -5,6 +5,11 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   main: {
+    build: {
+      externalizeDeps: {
+        exclude: ['@template/example-local-dependency']
+      }
+    },
     resolve: {
       alias: {
         '@shared': resolve('src/shared')

@@ -15,7 +15,8 @@ const api = {
       version: string
       isPackaged: boolean
       userDataPath: string
-    }> => ipcRenderer.invoke(IpcChannels.appGetInfo)
+    }> => ipcRenderer.invoke(IpcChannels.appGetInfo),
+    testLocalDependency: (): Promise<string> => ipcRenderer.invoke(IpcChannels.appTestLocalDependency)
   },
   db: {
     getSetting: (key: string): Promise<string | null> =>

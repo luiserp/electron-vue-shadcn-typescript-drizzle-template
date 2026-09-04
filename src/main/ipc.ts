@@ -1,46 +1,25 @@
 import { eq } from 'drizzle-orm'
-import { BrowserWindow, app, dialog, ipcMain, shell } from 'electron'
+import { app, ipcMain } from 'electron'
 import { getDb } from './db'
 import { settings } from './db/schema'
 import {
   IpcChannels,
-  appInfoSchema,
-  openDialogInputSchema,
-  openDialogResultSchema,
-  parseIpc,
-  saveDialogInputSchema,
-  saveDialogResultSchema,
-  setSettingInputSchema
+  appInfoSchema, parseIpc, setSettingInputSchema
 } from '../shared/ipc'
 import { z } from 'zod'
-
-function windowFromEvent(event: Electron.IpcMainInvokeEvent | Electron.IpcMainEvent): BrowserWindow | null {
-  return BrowserWindow.fromWebContents(event.sender)
-}
+import { exampleLocalDependency } from '@template/example-local-dependency'
+import { registerWindowIpc } from './window/ipc'
+import { registerDialogIpc } from './dialog/ipc'
 
 export function registerIpc(): void {
-  ipcMain.on(IpcChannels.windowMinimize, (event) => {
-    windowFromEvent(event)?.minimize()
-  })
 
-  ipcMain.on(IpcChannels.windowMaximize, (event) => {
-    const win = windowFromEvent(event)
-    if (!win) return
-    if (win.isMaximized()) {
-      win.unmaximize()
-    } else {
-      win.maximize()
-    }
-  })
+  // Register window IPC
+  registerWindowIpc();
 
-  ipcMain.on(IpcChannels.windowClose, (event) => {
-    windowFromEvent(event)?.close()
-  })
+  // Register dialog IPC  
+  registerDialogIpc();
 
-  ipcMain.handle(IpcChannels.windowIsMaximized, (event) => {
-    return windowFromEvent(event)?.isMaximized() ?? false
-  })
-
+  // Register database IPC
   ipcMain.handle(IpcChannels.dbGetSetting, async (_event, raw: unknown) => {
     const key = parseIpc(z.string().min(1), raw)
     const row = await getDb().select().from(settings).where(eq(settings.key, key)).get()
@@ -58,55 +37,7 @@ export function registerIpc(): void {
       })
   })
 
-  ipcMain.handle(IpcChannels.dialogOpen, async (event, raw: unknown) => {
-    const input = parseIpc(openDialogInputSchema, raw)
-    const win = windowFromEvent(event)
-    const result = win
-      ? await dialog.showOpenDialog(win, {
-          title: input?.title,
-          defaultPath: input?.defaultPath,
-          filters: input?.filters,
-          properties: input?.properties ?? ['openFile']
-        })
-      : await dialog.showOpenDialog({
-          title: input?.title,
-          defaultPath: input?.defaultPath,
-          filters: input?.filters,
-          properties: input?.properties ?? ['openFile']
-        })
-
-    return parseIpc(openDialogResultSchema, {
-      canceled: result.canceled,
-      filePaths: result.filePaths
-    })
-  })
-
-  ipcMain.handle(IpcChannels.dialogSave, async (event, raw: unknown) => {
-    const input = parseIpc(saveDialogInputSchema, raw)
-    const win = windowFromEvent(event)
-    const result = win
-      ? await dialog.showSaveDialog(win, {
-          title: input?.title,
-          defaultPath: input?.defaultPath,
-          filters: input?.filters
-        })
-      : await dialog.showSaveDialog({
-          title: input?.title,
-          defaultPath: input?.defaultPath,
-          filters: input?.filters
-        })
-
-    return parseIpc(saveDialogResultSchema, {
-      canceled: result.canceled,
-      filePath: result.filePath
-    })
-  })
-
-  ipcMain.handle(IpcChannels.shellOpenPath, async (_event, raw: unknown) => {
-    const filePath = parseIpc(z.string().min(1), raw)
-    return shell.openPath(filePath)
-  })
-
+  // Register app IPC
   ipcMain.handle(IpcChannels.appGetInfo, () => {
     return parseIpc(appInfoSchema, {
       name: app.getName(),
@@ -114,5 +45,10 @@ export function registerIpc(): void {
       isPackaged: app.isPackaged,
       userDataPath: app.getPath('userData')
     })
+  })
+
+  // Register Test Local Dependency IPC
+  ipcMain.handle(IpcChannels.appTestLocalDependency, () => {
+    return exampleLocalDependency();
   })
 }

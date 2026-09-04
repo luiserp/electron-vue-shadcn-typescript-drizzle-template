@@ -34,6 +34,7 @@ If you have built web apps before, the Vue part will feel familiar. The new part
 
 ```bash
 npm install
+npx install-electron --no
 ```
 
 The `postinstall` script runs `electron-builder install-app-deps`, which makes sure any native packages are built for the version of Node that Electron ships with (not the one you have on your PATH).

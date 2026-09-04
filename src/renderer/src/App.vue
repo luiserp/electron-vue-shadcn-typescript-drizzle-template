@@ -47,14 +47,6 @@ const pageTitle = computed(() => {
               </BreadcrumbList>
             </Breadcrumb>
           </div>
-          <div class="ml-auto px-4">
-            <RouterLink
-              to="/about"
-              class="text-muted-foreground hover:text-foreground text-sm"
-            >
-              About
-            </RouterLink>
-          </div>
         </header>
         <RouterView />
       </SidebarInset>

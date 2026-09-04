@@ -146,21 +146,52 @@ await window.api.db.setSetting('language', 'en')
 const lang = await window.api.db.getSetting('language')
 ```
 
-Or from the main process directly:
+Or from the main process:
 
 ```ts
 import { getDb } from './db'
-import { settings } from './db/schema'
+import { todosTable } from './db/schema/todos'
 ```
 
-### Changing the database schema
-
-1. Edit `src/main/db/schema.ts` to add or change tables.
-2. Run `npm run db:generate` to create a SQL migration file under `drizzle/`.
-3. Commit the new migration to git.
-4. Restart the app. Drizzle runs `migrate()` on startup and applies any pending migrations.
-
 `npm run db:studio` opens a web UI to browse `./dev.db`. This is the same file the app uses in development, so you can inspect live data.
+
+### Create a new database table
+
+Tables live as one file per table under `src/main/db/schema/`. [Drizzle's SQLite schema docs](https://orm.drizzle.team/docs/sql-schema-declaration) cover the column helpers.
+
+1. Add a schema file, for example `src/main/db/schema/notes.ts`:
+
+```ts
+import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+
+export const notesTable = sqliteTable('notes', {
+  id: integer().primaryKey({ autoIncrement: true }),
+  title: text().notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .$defaultFn(() => new Date())
+})
+```
+
+2. Register the table with the Drizzle client in `src/main/db/index.ts`. drizzle-kit already scans the whole `schema/` folder, but the running app only knows about tables you pass into `drizzle()`:
+
+```ts
+import * as schema from './schema/todos'
+```
+
+Import the new table into that `schema` object (a `schema/index.ts` barrel that re-exports every table is the usual way once you have more than one).
+
+3. Generate a SQL migration:
+
+```bash
+npm run db:generate
+```
+
+That writes a new file under `drizzle/`. Commit the SQL and the files in `drizzle/meta/` -- those are the migration history. Do not edit old migration files after they have been applied.
+
+4. Restart the app (`npm run dev`). `initDatabase()` in `src/main/main.ts` calls `migrate()` on startup and applies anything pending. Main-process code does not hot-reload, so a restart is required.
+
+Vue still cannot query the new table directly. Expose it through IPC the same way `window.api.db.getSetting` works. The [Adding IPC handlers](documentation/README.md) guide covers that pipeline.
 
 ## Routing
 

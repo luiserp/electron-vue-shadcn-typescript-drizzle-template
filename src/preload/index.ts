@@ -18,12 +18,6 @@ export const api = {
     }> => ipcRenderer.invoke(IpcChannels.appGetInfo),
     testLocalDependency: (): Promise<string> => ipcRenderer.invoke(IpcChannels.appTestLocalDependency)
   },
-  db: {
-    getSetting: (key: string): Promise<string | null> =>
-      ipcRenderer.invoke(IpcChannels.dbGetSetting, key),
-    setSetting: (key: string, value: string): Promise<void> =>
-      ipcRenderer.invoke(IpcChannels.dbSetSetting, { key, value })
-  },
   dialog: {
     open: (options?: OpenDialogInput): Promise<OpenDialogResult> =>
       ipcRenderer.invoke(IpcChannels.dialogOpen, options),

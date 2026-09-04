@@ -8,7 +8,7 @@ import {
   type SaveDialogResult
 } from '../shared/ipc'
 
-const api = {
+export const api = {
   app: {
     getInfo: (): Promise<{
       name: string
@@ -62,3 +62,5 @@ if (process.contextIsolated) {
   // @ts-ignore (define in dts)
   window.api = api
 }
+
+export type AppApi = typeof api

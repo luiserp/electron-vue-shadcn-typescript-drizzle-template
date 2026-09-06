@@ -1,5 +1,5 @@
 import { BrowserWindow, ipcMain } from "electron"
-import { IpcChannels } from "../../shared/ipc"
+import { IpcChannels } from "../../../shared/ipc"
 
 function windowFromEvent(event: Electron.IpcMainInvokeEvent | Electron.IpcMainEvent): BrowserWindow | null {
   return BrowserWindow.fromWebContents(event.sender)

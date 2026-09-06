@@ -1,7 +1,7 @@
 import { BrowserWindow, dialog, ipcMain, shell } from "electron"
-import { IpcChannels } from "../../shared/ipc"
-import { parseIpc } from "../../shared/ipc"
-import { openDialogInputSchema, openDialogResultSchema, saveDialogInputSchema, saveDialogResultSchema } from "../../shared/ipc"
+import { IpcChannels } from "../../../shared/ipc"
+import { parseIpc } from "../../../shared/ipc"
+import { openDialogInputSchema, openDialogResultSchema, saveDialogInputSchema, saveDialogResultSchema } from "../../../shared/ipc"
 import { z } from "zod"
 
 function windowFromEvent(event: Electron.IpcMainInvokeEvent | Electron.IpcMainEvent): BrowserWindow | null {

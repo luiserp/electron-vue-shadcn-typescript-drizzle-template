@@ -8,6 +8,13 @@
       "when": 1788560024243,
       "tag": "0000_smart_namorita",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1788639179841,
+      "tag": "0001_simple_white_queen",
+      "breakpoints": true
     }
   ]
 }

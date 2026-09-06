@@ -12,7 +12,17 @@ export const IpcChannels = {
   dialogSave: 'dialog:save',
   shellOpenPath: 'shell:open-path',
   appGetInfo: 'app:get-info',
-  appTestLocalDependency: 'app:test-local-dependency'
+  appTestLocalDependency: 'app:test-local-dependency',
+  // Todos IPC
+  todosGetAll: 'todos:get-all',
+  todosGetById: 'todos:get-by-id',
+  todosCreate: 'todos:create',
+  todosUpdate: 'todos:update',
+  todosDelete: 'todos:delete',
+  notesGetAll: 'notes:get-all',
+  notesCreate: 'notes:create',
+  notesDelete: 'notes:delete',
+  notesOpenTodoCount: 'notes:open-todo-count'
 } as const
 
 export const fileFilterSchema = z.object({
@@ -59,11 +69,26 @@ export const appInfoSchema = z.object({
   userDataPath: z.string()
 })
 
+export const todoSchema = z.object({
+  id: z.number(),
+  title: z.string(),
+  description: z.string(),
+  completed: z.boolean()
+})
+
+export const noteSchema = z.object({
+  id: z.number(),
+  title: z.string(),
+  body: z.string()
+})
+
 export type OpenDialogInput = z.infer<typeof openDialogInputSchema>
 export type OpenDialogResult = z.infer<typeof openDialogResultSchema>
 export type SaveDialogInput = z.infer<typeof saveDialogInputSchema>
 export type SaveDialogResult = z.infer<typeof saveDialogResultSchema>
 export type AppInfo = z.infer<typeof appInfoSchema>
+export type Todo = z.infer<typeof todoSchema>
+export type Note = z.infer<typeof noteSchema>
 
 export function parseIpc<T>(schema: z.ZodType<T>, value: unknown): T {
   return schema.parse(value)

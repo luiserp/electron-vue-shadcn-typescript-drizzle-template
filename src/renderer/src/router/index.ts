@@ -11,6 +11,18 @@ const router = createRouter({
       meta: { title: 'Home' }
     },
     {
+      path: '/todos',
+      name: 'todos',
+      component: () => import('@renderer/views/TodosView.vue'),
+      meta: { title: 'Todos' }
+    },
+    {
+      path: '/notes',
+      name: 'notes',
+      component: () => import('@renderer/views/NotesView.vue'),
+      meta: { title: 'Notes' }
+    },
+    {
       path: '/about',
       name: 'about',
       component: () => import('@renderer/views/AboutView.vue'),

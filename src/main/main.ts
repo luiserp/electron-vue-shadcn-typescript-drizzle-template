@@ -4,12 +4,12 @@ import { join } from 'path'
 import icon from '../../resources/icon.png?asset'
 import { APP_ID, APP_NAME } from '../shared/constants'
 import { IpcChannels } from '../shared/ipc'
-import { closeDatabase, initDatabase } from './db'
+import { closeDatabase } from './infrastructure/database'
 import { registerErrorHandlers } from './electron/errors'
-import { registerIpc } from './ipc'
-import { initLogger, log } from './electron/logger'
+import { initLogger } from './electron/logger'
 import { initAutoUpdater } from './electron/updater'
-import { loadWindowState, trackWindowState } from './window/window-state'
+import { loadWindowState, trackWindowState } from './electron/window/window-state'
+import { bootstrap } from './app/bootstrap'
 
 initLogger()
 registerErrorHandlers()
@@ -90,22 +90,13 @@ if (!gotTheLock) {
     focusMainWindow()
   })
 
-  app.whenReady().then(async () => {
-    
+  app.whenReady().then(async () => {    
     // Set the app user model id and name
     electronApp.setAppUserModelId(APP_ID)
     app.setName(APP_NAME)
 
-    // Initialize the database
-    try {
-      await initDatabase()
-    } catch (error) {
-      log.error('Failed to initialize database', error)
-      throw error
-    }
-
-    // Register the IPC channels
-    registerIpc()
+    // Bootstrap the application (business logic)
+    await bootstrap()
 
     app.on('browser-window-created', (_, window) => {
       optimizer.watchWindowShortcuts(window)

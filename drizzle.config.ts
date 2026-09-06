@@ -1,7 +1,7 @@
 import { defineConfig } from 'drizzle-kit'
 
 export default defineConfig({
-  schema: './src/main/db/schema',
+  schema: './src/main/infrastructure/database/schema',
   out: './drizzle',
   dialect: 'sqlite',
   dbCredentials: {

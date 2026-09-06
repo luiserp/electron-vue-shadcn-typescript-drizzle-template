@@ -2,12 +2,16 @@ import { app, ipcMain } from 'electron'
 import {
   IpcChannels,
   appInfoSchema, parseIpc
-} from '../shared/ipc'
+} from '../../shared/ipc'
 import { exampleLocalDependency } from '@template/example-local-dependency'
-import { registerWindowIpc } from './window/ipc'
-import { registerDialogIpc } from './dialog/ipc'
+import { registerWindowIpc } from '../electron/window/ipc'
+import { registerDialogIpc } from '../electron/dialog/ipc'
+import type { Application } from './container'
 
-export function registerIpc(): void {
+/**
+ * Main app IPC, each module can register its own IPC handlers on boot.
+ */
+export function registerApplicationIpc(_application: Application): void {
 
   // Register window IPC
   registerWindowIpc();

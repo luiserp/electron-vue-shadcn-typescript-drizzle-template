@@ -5,7 +5,9 @@ import {
   type OpenDialogInput,
   type OpenDialogResult,
   type SaveDialogInput,
-  type SaveDialogResult
+  type SaveDialogResult,
+  type Note,
+  type Todo
 } from '../shared/ipc'
 
 export const api = {
@@ -17,6 +19,23 @@ export const api = {
       userDataPath: string
     }> => ipcRenderer.invoke(IpcChannels.appGetInfo),
     testLocalDependency: (): Promise<string> => ipcRenderer.invoke(IpcChannels.appTestLocalDependency)
+  },
+  todos: {
+    getAll: (): Promise<Todo[]> => ipcRenderer.invoke(IpcChannels.todosGetAll),
+    getById: (id: number): Promise<Todo | null> =>
+      ipcRenderer.invoke(IpcChannels.todosGetById, id),
+    create: (todo: Omit<Todo, 'id'>): Promise<void> =>
+      ipcRenderer.invoke(IpcChannels.todosCreate, { id: 0, ...todo }),
+    update: (id: number, todo: Todo): Promise<void> =>
+      ipcRenderer.invoke(IpcChannels.todosUpdate, id, todo),
+    delete: (id: number): Promise<void> => ipcRenderer.invoke(IpcChannels.todosDelete, id)
+  },
+  notes: {
+    getAll: (): Promise<Note[]> => ipcRenderer.invoke(IpcChannels.notesGetAll),
+    create: (note: Omit<Note, 'id'>): Promise<void> =>
+      ipcRenderer.invoke(IpcChannels.notesCreate, { id: 0, ...note }),
+    delete: (id: number): Promise<void> => ipcRenderer.invoke(IpcChannels.notesDelete, id),
+    openTodoCount: (): Promise<number> => ipcRenderer.invoke(IpcChannels.notesOpenTodoCount)
   },
   dialog: {
     open: (options?: OpenDialogInput): Promise<OpenDialogResult> =>
